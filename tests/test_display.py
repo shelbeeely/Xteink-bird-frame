@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from PIL import Image
 
+from inky_bird_frame import display as display_module
 from inky_bird_frame.display import detect_display_size, show_on_inky
 from inky_bird_frame.errors import MissingDependencyError
 
@@ -27,6 +28,30 @@ class _FakeDisplay:
 
 
 class DisplayTests(unittest.TestCase):
+    @staticmethod
+    def _xteink_module_names() -> set[str]:
+        return {
+            backend.module_name
+            for backend in display_module._DISPLAY_BACKENDS
+            if backend.label.startswith("Xteink")
+        }
+
+    @staticmethod
+    def _xteink_x4_module_name() -> str:
+        return next(
+            backend.module_name
+            for backend in display_module._DISPLAY_BACKENDS
+            if backend.label == "Xteink X4"
+        )
+
+    @staticmethod
+    def _xteink_auto_module_name() -> str:
+        return next(
+            backend.module_name
+            for backend in display_module._DISPLAY_BACKENDS
+            if backend.module_name == "xteink.auto"
+        )
+
     def test_detect_display_size_prefers_xteink_backend(self) -> None:
         display = _FakeDisplay(width=1600, height=1200)
         xteink_module = SimpleNamespace(auto=lambda: display)
@@ -39,9 +64,10 @@ class DisplayTests(unittest.TestCase):
     def test_detect_display_size_falls_back_to_inky_backend(self) -> None:
         display = _FakeDisplay(width=1600, height=1200)
         inky_module = SimpleNamespace(auto=lambda: display)
+        xteink_modules = self._xteink_module_names()
 
         def importer(name: str) -> object:
-            if name in {"xteink.x4", "xteink.auto"}:
+            if name in xteink_modules:
                 raise ModuleNotFoundError(name)
             if name == "inky.auto":
                 return inky_module
@@ -54,13 +80,15 @@ class DisplayTests(unittest.TestCase):
 
     def test_detect_display_size_falls_back_when_xteink_init_fails(self) -> None:
         display = _FakeDisplay(width=1600, height=1200)
-        xteink_module = SimpleNamespace(auto=self._raising_factory)
+        xteink_module = SimpleNamespace(auto=self._simulate_xteink_init_error)
         inky_module = SimpleNamespace(auto=lambda: display)
+        xteink_x4_module = self._xteink_x4_module_name()
+        xteink_auto_module = self._xteink_auto_module_name()
 
         def importer(name: str) -> object:
-            if name == "xteink.x4":
+            if name == xteink_x4_module:
                 return xteink_module
-            if name == "xteink.auto":
+            if name == xteink_auto_module:
                 raise ModuleNotFoundError(name)
             if name == "inky.auto":
                 return inky_module
@@ -72,7 +100,7 @@ class DisplayTests(unittest.TestCase):
         self.assertEqual(size, (1600, 1200))
 
     @staticmethod
-    def _raising_factory() -> _FakeDisplay:
+    def _simulate_xteink_init_error() -> _FakeDisplay:
         raise OSError("xteink failed")
 
     def test_show_on_inky_raises_when_no_backend_is_available(self) -> None:

@@ -28,7 +28,9 @@ class _DisplayBackend:
 
 
 _DISPLAY_BACKENDS: tuple[_DisplayBackend, ...] = (
-    # The Xteink X4 software stack has used multiple factory names across releases.
+    # Xteink X4 releases have exposed different constructor names:
+    # auto (newer), x4/X4 (legacy aliases), and display (early preview builds).
+    # Keep all of them for long-term backward compatibility with existing installations.
     _DisplayBackend("xteink.x4", ("auto", "x4", "X4", "display"), "Xteink X4"),
     _DisplayBackend("xteink.auto", ("auto",), "Xteink"),
     _DisplayBackend("inky.auto", ("auto",), "Pimoroni Inky"),
@@ -37,6 +39,7 @@ _DISPLAY_BACKENDS: tuple[_DisplayBackend, ...] = (
 
 def _load_display() -> tuple[_InkyDisplay, str]:
     last_error: Exception | None = None
+    backend_errors: list[str] = []
     for backend in _DISPLAY_BACKENDS:
         try:
             module = import_module(backend.module_name)
@@ -47,11 +50,14 @@ def _load_display() -> tuple[_InkyDisplay, str]:
             if callable(factory):
                 try:
                     display = cast(Callable[[], _InkyDisplay], factory)()
-                except Exception as exc:  # pragma: no cover - hardware-specific failure path
+                except (OSError, RuntimeError) as exc:  # pragma: no cover - backend init failures
                     last_error = exc
+                    backend_errors.append(f"{backend.module_name}.{factory_name}: {exc}")
                     continue
                 return display, backend.label
     if last_error is not None:
+        details = "; ".join(backend_errors)
+        last_error.add_note(f"Backend initialization failures: {details}")
         raise last_error
     raise MissingDependencyError(
         "Xteink X4 or Pimoroni Inky Python support is required for display output"
