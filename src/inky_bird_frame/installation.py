@@ -478,23 +478,27 @@ def _systemd_controller_checks(config: AppConfig) -> Iterable[DiagnosticCheck]:
 
 def _display_hardware_check() -> DiagnosticCheck:
     code = (
-        "from inky.auto import auto; display = auto(); print(f'{display.width}x{display.height}')"
+        "from inky_bird_frame.display import detect_display_size; "
+        "width, height = detect_display_size(); print(f'{width}x{height}')"
     )
     result = _run([sys.executable, "-c", code], timeout_seconds=30)
     output = result.stdout.strip()
     if result.returncode != 0:
         return _fail(
             "inky_hardware",
-            "Pimoroni Inky auto-detection failed",
+            "Display auto-detection failed",
             detail=result.stderr or output,
-            remediation="Check the 40-pin connection, SPI/I2C settings, and the Inky Python extra.",
+            remediation=(
+                "Check the 40-pin connection, SPI/I2C settings, and the Xteink X4 or Inky "
+                "Python support."
+            ),
         )
     if output == "1600x1200":
-        return _pass("inky_hardware", "Detected the supported 1600x1200 Inky display")
+        return _pass("inky_hardware", "Detected the supported 1600x1200 display")
     return _fail(
         "inky_hardware",
-        f"Detected unsupported Inky geometry: {output or 'unknown'}",
-        remediation="This release supports the 13.3-inch PIM774 1600x1200 panel.",
+        f"Detected unsupported display geometry: {output or 'unknown'}",
+        remediation="This release supports the 1600x1200 display profile.",
     )
 
 

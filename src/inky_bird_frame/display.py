@@ -1,8 +1,9 @@
-"""Pimoroni Inky display adapter."""
+"""Display adapter for supported e-paper hardware."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from importlib import import_module
 from pathlib import Path
 from typing import Protocol, cast
@@ -19,19 +20,49 @@ class _InkyDisplay(Protocol):
     def show(self) -> None: ...
 
 
+@dataclass(frozen=True)
+class _DisplayBackend:
+    module_name: str
+    factory_names: tuple[str, ...]
+    label: str
+
+
+_DISPLAY_BACKENDS: tuple[_DisplayBackend, ...] = (
+    _DisplayBackend("xteink.x4", ("auto", "x4", "X4", "display"), "Xteink X4"),
+    _DisplayBackend("xteink.auto", ("auto",), "Xteink"),
+    _DisplayBackend("inky.auto", ("auto",), "Pimoroni Inky"),
+)
+
+
+def _load_display() -> tuple[_InkyDisplay, str]:
+    for backend in _DISPLAY_BACKENDS:
+        try:
+            module = import_module(backend.module_name)
+        except ModuleNotFoundError:
+            continue
+        for factory_name in backend.factory_names:
+            factory = getattr(module, factory_name, None)
+            if callable(factory):
+                display = cast(Callable[[], _InkyDisplay], factory)()
+                return display, backend.label
+    raise MissingDependencyError(
+        "Xteink X4 or Pimoroni Inky Python support is required for display output"
+    )
+
+
+def detect_display_size() -> tuple[int, int]:
+    display, _ = _load_display()
+    return display.width, display.height
+
+
 def show_on_inky(image_path: Path) -> tuple[int, int]:
     try:
         from PIL import Image
     except ModuleNotFoundError as exc:
         raise MissingDependencyError("Pillow is required to load display images") from exc
-    try:
-        module = import_module("inky.auto")
-    except ModuleNotFoundError as exc:
-        raise MissingDependencyError("Pimoroni Inky is required for display output") from exc
 
     image = Image.open(image_path).convert("RGB")
-    auto = cast(Callable[[], _InkyDisplay], module.auto)
-    display = auto()
+    display, _ = _load_display()
     expected_size = (display.width, display.height)
     if image.size != expected_size:
         raise ValueError(f"image size {image.size} does not match display size {expected_size}")
