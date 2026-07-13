@@ -99,12 +99,12 @@ This is everything required to build the part that hangs on the wall.
 
 | Part | Qty | Unit price | Extended | Purpose |
 | --- | ---: | ---: | ---: | --- |
-| Xteink X4 e-paper display | 1 | — | — | Six-color, 1600x1200 e-paper display |
+| Xteink X4 e-paper display | 1 | — | — | Six-color, 1600x1200 e-paper display (see Xteink for current price) |
 | [Raspberry Pi Zero 2 W with pre-soldered header](https://www.pishop.us/product/raspberry-pi-zero-2w-with-headers/) | 1 | $20.75 | $20.75 | Compact Wi-Fi display node; no soldering required |
 | [5V 2.5A Micro-USB power supply](https://www.adafruit.com/product/1995) | 1 | $8.25 | $8.25 | Powers the display node with a standard straight cable |
 | [Official Raspberry Pi 64GB A2 microSD card](https://www.pishop.us/product/raspberry-pi-sd-card-64gb/) | 1 | $29.95 | $29.95 | Operating system and local image cache |
 | [Golden State Art 12 x 16 inch bronze frame](https://www.amazon.com/gp/aw/d/B0C1Q5MYG9) | 1 | $24.99 | $24.99 | Portrait frame; the included 8 x 10.5 inch mat must be enlarged or replaced |
-| **Framed display subtotal** |  |  | **$83.94** | Before tax and shipping; Xteink X4 price not included |
+| **Framed display subtotal (excl. Xteink X4)** |  |  | **$83.94** | Before tax and shipping; add the Xteink X4 display price |
 
 The display's active area is approximately 7.98 x 10.65 inches. The included
 8 x 10.5 inch mat masks part of that area and must not be used unchanged. Enlarge
