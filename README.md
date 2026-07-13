@@ -37,7 +37,7 @@ flowchart LR
     B --> C["Approved plate catalog"]
     C --> D["HTTP on the private network"]
     D --> E["Raspberry Pi display node"]
-    E --> F["Pimoroni Inky Impression"]
+    E --> F["Xteink X4"]
     B --> G["Codex generation and review"]
     G --> C
 ```
@@ -48,7 +48,7 @@ The system has two deliberately small roles:
   downloads references, researches facts, generates and reviews candidates,
   and serves approved assets.
 - The **display node** downloads approved assets, verifies their checksums, and
-  rotates them on the Inky panel. It does no AI or discovery work.
+  rotates them on the Xteink X4 panel. It does no AI or discovery work.
 
 The roles may run on one capable Raspberry Pi, but the recommended wall build
 keeps the lightweight display node behind the frame and runs the controller on
@@ -99,12 +99,12 @@ This is everything required to build the part that hangs on the wall.
 
 | Part | Qty | Unit price | Extended | Purpose |
 | --- | ---: | ---: | ---: | --- |
-| [Pimoroni Inky Impression 13.3 inch (PIM774)](https://www.adafruit.com/product/6472) | 1 | $275.00 | $275.00 | Six-color, 1600x1200 e-paper display; mounting hardware and GPIO extension header are included |
+| Xteink X4 e-paper display | 1 | — | — | Six-color, 1600x1200 e-paper display |
 | [Raspberry Pi Zero 2 W with pre-soldered header](https://www.pishop.us/product/raspberry-pi-zero-2w-with-headers/) | 1 | $20.75 | $20.75 | Compact Wi-Fi display node; no soldering required |
 | [5V 2.5A Micro-USB power supply](https://www.adafruit.com/product/1995) | 1 | $8.25 | $8.25 | Powers the display node with a standard straight cable |
 | [Official Raspberry Pi 64GB A2 microSD card](https://www.pishop.us/product/raspberry-pi-sd-card-64gb/) | 1 | $29.95 | $29.95 | Operating system and local image cache |
 | [Golden State Art 12 x 16 inch bronze frame](https://www.amazon.com/gp/aw/d/B0C1Q5MYG9) | 1 | $24.99 | $24.99 | Portrait frame; the included 8 x 10.5 inch mat must be enlarged or replaced |
-| **Framed display subtotal** |  |  | **$358.94** | Before tax and shipping |
+| **Framed display subtotal** |  |  | **$83.94** | Before tax and shipping; Xteink X4 price not included |
 
 The display's active area is approximately 7.98 x 10.65 inches. The included
 8 x 10.5 inch mat masks part of that area and must not be used unchanged. Enlarge
@@ -164,7 +164,7 @@ cable, or display-node enclosure is required for normal operation.
 The controller requires Python 3.11 or newer, Codex CLI authenticated with a
 ChatGPT subscription, and network access to Codex, iNaturalist, optional eBird,
 Zippopotam.us, and configured research sources. The display node requires
-Python 3.11 or newer with Pimoroni's Inky package and network access to the
+Python 3.11 or newer with the Xteink X4 package and network access to the
 controller HTTP service.
 
 The panel reports a `1600x1200` landscape canvas. Plates are authored at
@@ -182,7 +182,7 @@ native macOS/Linux services or the production [Docker deployment](docs/docker.md
 The commissioning flow is intentionally staged:
 
 1. prepare and diagnose the controller;
-2. flash the display Pi and attach PIM774;
+2. flash the display Pi and attach the Xteink X4;
 3. show the included Eastern Bluebird without AI or a controller;
 4. prove the Pi can reach the controller; and
 5. enable live rotation and automatic generation.

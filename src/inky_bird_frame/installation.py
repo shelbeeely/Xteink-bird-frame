@@ -489,9 +489,9 @@ def _display_hardware_check() -> DiagnosticCheck:
             "Display auto-detection failed",
             detail=result.stderr or output,
             remediation=(
-                "Check the 40-pin connection, SPI/I2C settings, and the Xteink X4 or Inky "
-                "Python support. Verify either backend with "
-                '`python -c "import xteink.x4"` or `python -c "import inky.auto"`.'
+                "Check the 40-pin connection, SPI/I2C settings, and the Xteink X4 "
+                "Python support. Verify the backend with "
+                '`python -c "import xteink.x4"`.'
             ),
         )
     if output == "1600x1200":

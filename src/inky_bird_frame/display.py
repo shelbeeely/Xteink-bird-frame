@@ -32,8 +32,6 @@ _DISPLAY_BACKENDS: tuple[_DisplayBackend, ...] = (
     # auto (newer), x4/X4 (legacy aliases), and display (early preview builds).
     # Keep all of them for long-term backward compatibility with existing installations.
     _DisplayBackend("xteink.x4", ("auto", "x4", "X4", "display"), "Xteink X4"),
-    _DisplayBackend("xteink.auto", ("auto",), "Xteink"),
-    _DisplayBackend("inky.auto", ("auto",), "Pimoroni Inky"),
 )
 
 
@@ -59,9 +57,7 @@ def _load_display() -> tuple[_InkyDisplay, str]:
         details = "; ".join(backend_errors)
         last_error.add_note(f"Backend initialization failures: {details}")
         raise last_error
-    raise MissingDependencyError(
-        "Xteink X4 or Pimoroni Inky Python support is required for display output"
-    )
+    raise MissingDependencyError("Xteink X4 Python support is required for display output")
 
 
 def detect_display_size() -> tuple[int, int]:

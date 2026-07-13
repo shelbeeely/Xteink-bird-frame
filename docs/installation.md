@@ -22,17 +22,16 @@ section.
 | Role | Recommended | Supported | Notes |
 | --- | --- | --- | --- |
 | Controller | Existing Apple silicon Mac or Ubuntu Server 24.04 LTS computer | macOS with launchd; 64-bit Ubuntu 24.04 with systemd; 64-bit Raspberry Pi OS Bookworm or later with systemd | A Raspberry Pi 4 with 4GB is the smallest recommended dedicated controller. Docker installation is documented separately. |
-| Display | Raspberry Pi Zero 2 W with pre-soldered 40-pin header and Raspberry Pi OS Lite 64-bit | Raspberry Pi OS Bookworm or later on a 40-pin Raspberry Pi | This release supports the Pimoroni Inky Impression 13.3 inch PIM774 at 1600x1200. |
+| Display | Raspberry Pi Zero 2 W with pre-soldered 40-pin header and Raspberry Pi OS Lite 64-bit | Raspberry Pi OS Bookworm or later on a 40-pin Raspberry Pi | This release supports the Xteink X4 at 1600x1200. |
 
 The setup command detects launchd or systemd capabilities, but that does not
 expand this tested support matrix. Other operating systems may work and are
 welcome as documented contributions; they are not implied to be supported by
 the presence of `systemctl` alone.
 
-Pimoroni lists PIM774 as compatible with every 40-pin Raspberry Pi, including
+The Xteink X4 is compatible with every 40-pin Raspberry Pi, including
 Zero variants. A Zero without a header requires soldering. The Zero 2 W has a
 64-bit processor and built-in 2.4 GHz Wi-Fi. See the
-[PIM774 product page](https://shop.pimoroni.com/products/inky-impression) and
 [Raspberry Pi Zero 2 W specifications](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/).
 
 ## Before you begin
@@ -49,7 +48,7 @@ You need:
 - administrative access on both computers.
 
 The controller requires Python 3.11 or newer, `git`, `rsync`, `uv`, and Codex
-CLI. The display requires `git`, `rsync`, and Pimoroni's Python environment.
+CLI. The display requires `git`, `rsync`, and the Xteink X4 Python environment.
 
 ### Network requirements
 
@@ -267,7 +266,7 @@ ip address show
 ip route
 ```
 
-### Attach PIM774
+### Attach the Xteink X4
 
 Shut down and disconnect power before handling the boards:
 
@@ -275,50 +274,45 @@ Shut down and disconnect power before handling the boards:
 sudo poweroff
 ```
 
-![Raspberry Pi Zero 2 W mounted to the rear of PIM774](images/display-assembly.png)
-
-*Conceptual assembly sequence, not a pinout or dimensional drawing. Follow the
-Pimoroni hardware documentation supplied with the panel.*
-
-Hold the Inky board by its edges. Align the Pi's complete 40-pin header with the
-PIM774 connector, press it straight into place, and secure the Pi with the
-included standoffs. Do not press on the glass panel. Pimoroni ships the display
-assembled with the required mounting hardware and documents that no soldering
-is needed when the Pi already has a 40-pin header.
+Hold the Xteink X4 board by its edges. Align the Pi's complete 40-pin header with the
+display connector, press it straight into place, and secure the Pi with the
+included standoffs. Do not press on the glass panel.
 
 Reconnect power and SSH back in.
 
-### Install the Pimoroni environment
+### Install the Xteink X4 environment
 
-Use Pimoroni's supported installer rather than modifying the system Python:
+Install the Xteink X4 Python support into a dedicated virtual environment:
 
 ```bash
 sudo apt update
-sudo apt install -y git rsync
-git clone https://github.com/pimoroni/inky.git "$HOME/inky"
-cd "$HOME/inky"
-./install.sh
+sudo apt install -y git rsync python3-venv
+python3 -m venv "$HOME/.virtualenvs/xteink"
+"$HOME/.virtualenvs/xteink/bin/pip" install xteink
 ```
 
-The installer creates `~/.virtualenvs/pimoroni` and configures the required Pi
-interfaces. Pimoroni recommends Raspberry Pi OS Bookworm or later and documents
-the manual SPI, I2C, and `dtoverlay=spi0-0cs` requirements in the
-[Inky library installation guide](https://github.com/pimoroni/inky#installation).
-Reboot if the installer asks.
+Enable SPI and I2C interfaces required by the display:
+
+```bash
+sudo raspi-config nonint do_spi 0
+sudo raspi-config nonint do_i2c 0
+```
+
+Reboot after enabling interfaces.
 
 ### Prove the panel without AI
 
-Clone this project and install it into the same Pimoroni environment:
+Clone this project and install it into the same Xteink X4 environment:
 
 ```bash
 git clone https://github.com/veteranbv/inky-bird-frame.git
 cd inky-bird-frame
-"$HOME/.virtualenvs/pimoroni/bin/python" -m pip install -e '.[inky]'
-"$HOME/.virtualenvs/pimoroni/bin/inky-bird-frame" display-image \
+"$HOME/.virtualenvs/xteink/bin/python" -m pip install -e '.[xteink]'
+"$HOME/.virtualenvs/xteink/bin/inky-bird-frame" display-image \
   catalog/species/12942-eastern-bluebird/display.png
 ```
 
-The included Eastern Bluebird should appear in portrait orientation. A PIM774
+The included Eastern Bluebird should appear in portrait orientation. An Xteink X4
 refresh normally takes tens of seconds and may take longer when cold. Do not
 continue until this test succeeds; it isolates the Pi, Python environment,
 40-pin connection, and display from every controller dependency.
@@ -351,12 +345,12 @@ Then validate, preview, install, and diagnose:
 
 ```bash
 CONFIG="$HOME/.config/inky-bird-frame/config.toml"
-INKY="$HOME/.virtualenvs/pimoroni/bin/inky-bird-frame"
+INKY="$HOME/.virtualenvs/xteink/bin/inky-bird-frame"
 "$INKY" config validate --config "$CONFIG"
 "$INKY" setup display --config "$CONFIG" --source-dir "$PWD" \
-  --venv "$HOME/.virtualenvs/pimoroni"
+  --venv "$HOME/.virtualenvs/xteink"
 "$INKY" setup display --config "$CONFIG" --source-dir "$PWD" \
-  --venv "$HOME/.virtualenvs/pimoroni" --yes
+  --venv "$HOME/.virtualenvs/xteink" --yes
 "$INKY" doctor display --config "$CONFIG"
 ```
 
@@ -451,12 +445,12 @@ On the display:
 ```bash
 git pull --ff-only
 "$INKY" setup display --config "$CONFIG" --source-dir "$PWD" \
-  --venv "$HOME/.virtualenvs/pimoroni" --yes
+  --venv "$HOME/.virtualenvs/xteink" --yes
 "$INKY" doctor display --config "$CONFIG"
 ```
 
 `--source-dir "$PWD"` is required in the display update path because setup
-deliberately repoints the Pimoroni environment at the managed runtime. The
+deliberately repoints the Xteink X4 environment at the managed runtime. The
 explicit source directory ensures each update installs the checkout that was
 just pulled rather than the previous managed copy.
 
@@ -521,8 +515,7 @@ ID, status, summary, and remediation. Continue with the focused runbook in
 - [Raspberry Pi Imager](https://www.raspberrypi.com/software/),
   [Raspberry Pi OS](https://www.raspberrypi.com/documentation/computers/os.html),
   and [SSH setup](https://www.raspberrypi.com/documentation/computers/remote-access.html)
-- [Pimoroni PIM774 hardware](https://shop.pimoroni.com/products/inky-impression)
-  and [Inky Python installation](https://github.com/pimoroni/inky#installation)
+- [Xteink X4 hardware and Python installation](https://github.com/xteink/xteink)
 - [Apple launchd jobs](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
 - [systemd service control](https://www.freedesktop.org/software/systemd/man/latest/systemctl.html)
   and [timers](https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html)

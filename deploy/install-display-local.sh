@@ -49,7 +49,7 @@ if [ "${root}" != "${app_dir}" ]; then
     install -m 0644 "${root}/${file}" "${app_dir}/${file}"
   done
 fi
-"${venv}/bin/python" -m pip install --disable-pip-version-check -e "${app_dir}[inky]"
+"${venv}/bin/python" -m pip install --disable-pip-version-check -e "${app_dir}[xteink]"
 
 unit_dir=$(mktemp -d)
 trap 'rm -rf "${unit_dir}"' EXIT

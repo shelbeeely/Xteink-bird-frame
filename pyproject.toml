@@ -14,9 +14,7 @@ dependencies = [
 controller = [
     "apprise>=1.12.0,<2",
 ]
-inky = [
-    "inky>=2.4",
-]
+xteink = []
 dev = [
     "apprise>=1.12.0,<2",
     "mypy>=1.8.0",

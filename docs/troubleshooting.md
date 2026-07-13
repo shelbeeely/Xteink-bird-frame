@@ -118,34 +118,34 @@ dtoverlay=spi0-0cs
 ```
 
 On current Raspberry Pi OS these normally live in
-`/boot/firmware/config.txt`. Use Pimoroni's installer when possible. Reboot
+`/boot/firmware/config.txt`. Enable SPI and I2C with `raspi-config`. Reboot
 after changing boot configuration.
 
 ### `inky_hardware` fails
 
 Power off before reseating the Pi. Verify that all 40 pins are aligned and the
 Pi is not offset by one row or column. Confirm that the Python environment is
-the Pimoroni environment:
+the Xteink X4 environment:
 
 ```bash
-"$HOME/.virtualenvs/pimoroni/bin/python" -c \
-  'from inky.auto import auto; d=auto(); print(d.width, d.height)'
+"$HOME/.virtualenvs/xteink/bin/python" -c \
+  'from xteink.x4 import auto; d=auto(); print(d.width, d.height)'
 ```
 
-The supported result is `1600 1200`. If import fails, rerun Pimoroni's installer
-and reinstall this project's `inky` extra into that same environment.
+The supported result is `1600 1200`. If import fails, reinstall the Xteink X4
+package and reinstall this project's `xteink` extra into that same environment.
 
 ### The included image is rotated incorrectly
 
 Use the committed `display.png`, not `portrait.png`:
 
 ```bash
-"$HOME/.virtualenvs/pimoroni/bin/inky-bird-frame" display-image \
+"$HOME/.virtualenvs/xteink/bin/inky-bird-frame" display-image \
   catalog/species/12942-eastern-bluebird/display.png
 ```
 
 The catalog's display asset is already rotated left for a portrait-mounted
-PIM774. Do not add a second OS-level rotation.
+Xteink X4. Do not add a second OS-level rotation.
 
 ### The Pi reaches Wi-Fi but not the controller
 
