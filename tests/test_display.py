@@ -16,10 +16,10 @@ class _FakeDisplay:
     def __init__(self, width: int = 1600, height: int = 1200) -> None:
         self.width = width
         self.height = height
-        self.image: object | None = None
+        self.image: Image.Image | None = None
         self.shown = False
 
-    def set_image(self, image: object) -> None:
+    def set_image(self, image: Image.Image) -> None:
         self.image = image
 
     def show(self) -> None:
@@ -51,6 +51,29 @@ class DisplayTests(unittest.TestCase):
             size = detect_display_size()
 
         self.assertEqual(size, (1600, 1200))
+
+    def test_detect_display_size_falls_back_when_xteink_init_fails(self) -> None:
+        display = _FakeDisplay(width=1600, height=1200)
+        xteink_module = SimpleNamespace(auto=self._raising_factory)
+        inky_module = SimpleNamespace(auto=lambda: display)
+
+        def importer(name: str) -> object:
+            if name == "xteink.x4":
+                return xteink_module
+            if name == "xteink.auto":
+                raise ModuleNotFoundError(name)
+            if name == "inky.auto":
+                return inky_module
+            raise AssertionError(f"Unexpected import: {name}")
+
+        with patch("inky_bird_frame.display.import_module", side_effect=importer):
+            size = detect_display_size()
+
+        self.assertEqual(size, (1600, 1200))
+
+    @staticmethod
+    def _raising_factory() -> _FakeDisplay:
+        raise OSError("xteink failed")
 
     def test_show_on_inky_raises_when_no_backend_is_available(self) -> None:
         with (
