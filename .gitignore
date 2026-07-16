@@ -13,3 +13,5 @@ var/
 .pytest_cache/
 config.toml
 controller.env
+firmware/.pio/
+firmware/include/config.h

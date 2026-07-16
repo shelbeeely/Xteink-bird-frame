@@ -1,9 +1,10 @@
 # Installation
 
-This guide takes a blank controller and a blank Raspberry Pi display node to a
-working, reboot-persistent Inky Bird Frame. Follow it in order. The first panel
-test uses an included plate and does not require Codex, observations, or a
-working controller.
+This guide takes a blank controller plus either a direct-on-device Xteink
+firmware display node or a Raspberry Pi display node to a working,
+reboot-persistent Inky Bird Frame. Follow it in order. The first panel test
+uses an included plate and does not require Codex, observations, or a working
+controller.
 
 ![Controller, network, and display-node installation flow](images/installation-architecture.png)
 
@@ -22,17 +23,18 @@ section.
 | Role | Recommended | Supported | Notes |
 | --- | --- | --- | --- |
 | Controller | Existing Apple silicon Mac or Ubuntu Server 24.04 LTS computer | macOS with launchd; 64-bit Ubuntu 24.04 with systemd; 64-bit Raspberry Pi OS Bookworm or later with systemd | A Raspberry Pi 4 with 4GB is the smallest recommended dedicated controller. Docker installation is documented separately. |
-| Display | Raspberry Pi Zero 2 W with pre-soldered 40-pin header and Raspberry Pi OS Lite 64-bit | Raspberry Pi OS Bookworm or later on a 40-pin Raspberry Pi | This release supports the Xteink X4 at 1600x1200. |
+| Display | Xteink X4 running the PlatformIO firmware project in [`/firmware`](../firmware/README.md) | Raspberry Pi Zero 2 W with pre-soldered 40-pin header and Raspberry Pi OS Lite 64-bit; Raspberry Pi OS Bookworm or later on a 40-pin Raspberry Pi | Use the firmware path to run the display node on-device; keep the Pi path if you prefer the existing Python client. |
 
 The setup command detects launchd or systemd capabilities, but that does not
 expand this tested support matrix. Other operating systems may work and are
 welcome as documented contributions; they are not implied to be supported by
 the presence of `systemctl` alone.
 
-The Xteink X4 is compatible with every 40-pin Raspberry Pi, including
-Zero variants. A Zero without a header requires soldering. The Zero 2 W has a
-64-bit processor and built-in 2.4 GHz Wi-Fi. See the
-[Raspberry Pi Zero 2 W specifications](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/).
+The Xteink X4 firmware path removes the wall-mounted Raspberry Pi entirely. If
+you choose the legacy Pi path instead, the Xteink X4 is compatible with every
+40-pin Raspberry Pi, including Zero variants. A Zero without a header requires
+soldering. The Zero 2 W has a 64-bit processor and built-in 2.4 GHz Wi-Fi. See
+the [Raspberry Pi Zero 2 W specifications](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/).
 
 ## Before you begin
 
@@ -40,7 +42,8 @@ You need:
 
 - the framed-display parts in the [README bill of materials](../README.md#framed-display);
 - one controller from the support table;
-- a computer with a microSD reader;
+- a computer with either a microSD reader for the Raspberry Pi path or USB
+  access for the firmware path;
 - a GitHub connection to clone this public repository;
 - a ChatGPT plan that includes Codex, or an OpenAI API key with separate API
   billing;
@@ -48,7 +51,8 @@ You need:
 - administrative access on both computers.
 
 The controller requires Python 3.11 or newer, `git`, `rsync`, `uv`, and Codex
-CLI. The display requires `git`, `rsync`, and the Xteink X4 Python environment.
+CLI. The firmware display path requires `git` and PlatformIO. The Raspberry Pi
+display path requires `git`, `rsync`, and the Xteink X4 Python environment.
 
 ### Network requirements
 
@@ -67,6 +71,28 @@ initiates every application connection.
 Do not expose port 8793 to the public internet. The built-in server is an
 unauthenticated, read-only LAN service. Use a VPN or an authenticated TLS reverse
 proxy if traffic must cross an untrusted network.
+
+## Firmware display-node alternative
+
+To run the display node on the Xteink hardware itself, use the PlatformIO
+project in [`/firmware`](../firmware/README.md):
+
+```bash
+cd /home/runner/work/Xteink-bird-frame/Xteink-bird-frame
+git submodule update --init --recursive
+cp firmware/include/config.h.example firmware/include/config.h
+cd firmware
+pio run
+pio run --target upload
+```
+
+Edit `firmware/include/config.h` with the Wi-Fi credentials, controller URL,
+rotation mode, and rotation interval for your installation. The firmware client
+stores rotation state in NVS and fetches the same controller catalog served to
+the Raspberry Pi display node.
+
+The remaining sections document the Raspberry Pi path, which remains supported
+for installations that prefer the existing Python client.
 
 ## 1. Install the controller
 

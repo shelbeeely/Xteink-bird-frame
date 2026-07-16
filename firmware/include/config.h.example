@@ -1,0 +1,30 @@
+#pragma once
+
+#include <Arduino.h>
+
+namespace inky_bird_frame {
+
+enum class RotationMode {
+  Sequential,
+  ShuffleBag,
+};
+
+inline constexpr char WIFI_SSID[] = "YOUR_WIFI_SSID";
+inline constexpr char WIFI_PASSWORD[] = "YOUR_WIFI_PASSWORD";
+inline constexpr char CONTROLLER_URL[] = "http://controller.example:8793";
+inline constexpr RotationMode ROTATION_MODE = RotationMode::ShuffleBag;
+inline constexpr bool PRIORITIZE_LATEST_DETECTION = true;
+inline constexpr uint32_t ROTATION_MINUTES = 30;
+inline constexpr uint32_t CATALOG_TIMEOUT_MS = 20000;
+inline constexpr uint32_t ASSET_TIMEOUT_MS = 60000;
+inline constexpr uint32_t WIFI_RETRY_DELAY_MS = 5000;
+inline constexpr bool USE_DEEP_SLEEP = false;
+
+inline constexpr int DISPLAY_SCLK = 8;
+inline constexpr int DISPLAY_MOSI = 10;
+inline constexpr int DISPLAY_CS = 21;
+inline constexpr int DISPLAY_DC = 4;
+inline constexpr int DISPLAY_RST = 5;
+inline constexpr int DISPLAY_BUSY = 6;
+
+}  // namespace inky_bird_frame

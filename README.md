@@ -36,7 +36,7 @@ flowchart LR
     A["iNaturalist / eBird / BirdWeather"] --> B["Controller"]
     B --> C["Approved plate catalog"]
     C --> D["HTTP on the private network"]
-    D --> E["Raspberry Pi display node"]
+    D --> E["Display node firmware or Raspberry Pi"]
     E --> F["Xteink X4"]
     B --> G["Codex generation and review"]
     G --> C
@@ -51,12 +51,13 @@ The system has two deliberately small roles:
   rotates them on the Xteink X4 panel. It does no AI or discovery work.
 
 The roles may run on one capable Raspberry Pi, but the recommended wall build
-keeps the lightweight display node behind the frame and runs the controller on
-an existing Mac, Linux computer, Raspberry Pi 4 or 5, or Docker host. A Pi Zero
-2 W is recommended for display duty, not Codex generation.
+keeps only the lightweight display node behind the frame and runs the controller
+on an existing Mac, Linux computer, Raspberry Pi 4 or 5, or Docker host. The
+display node can run either as direct Xteink firmware from [`firmware/`](firmware/)
+or as the existing Raspberry Pi client.
 
 <p align="center">
-  <img src="docs/images/installation-architecture.png" alt="Inky Bird Frame architecture showing a Mac or Raspberry Pi controller serving approved bird plates over a private home network to a Raspberry Pi Zero 2 W display node" width="900">
+  <img src="docs/images/installation-architecture.png" alt="Inky Bird Frame architecture showing a Mac or Raspberry Pi controller serving approved bird plates over a private home network to a display node running on Xteink firmware or a Raspberry Pi" width="900">
   <br><em>The controller performs discovery and generation; the display node only pulls approved plates over the local network.</em>
 </p>
 
@@ -88,10 +89,12 @@ fact synthesis, illustration, and independent review.
 
 ## Hardware
 
-The reference build uses two computers with distinct jobs. A Raspberry Pi Zero
-2 W lives behind the frame and only displays approved images. A Raspberry Pi 4
-or an existing macOS/Linux computer runs discovery, Codex generation and
-review, catalog publication, and the HTTP service.
+The reference build uses a separate controller plus one lightweight display
+node. The display side can run directly on the Xteink hardware through the
+community SDK firmware client in [`firmware/`](firmware/) or on a Raspberry Pi
+using the existing Python display node. A Raspberry Pi 4 or an existing
+macOS/Linux computer runs discovery, Codex generation and review, catalog
+publication, and the HTTP service.
 
 ### Framed display
 
@@ -100,11 +103,17 @@ This is everything required to build the part that hangs on the wall.
 | Part | Qty | Unit price | Extended | Purpose |
 | --- | ---: | ---: | ---: | --- |
 | Xteink X4 e-paper display | 1 | — | — | Six-color, 1600x1200 e-paper display (see Xteink for current price) |
+| [Golden State Art 12 x 16 inch bronze frame](https://www.amazon.com/gp/aw/d/B0C1Q5MYG9) | 1 | $24.99 | $24.99 | Portrait frame; the included 8 x 10.5 inch mat must be enlarged or replaced |
+| **Framed display subtotal (excl. Xteink X4)** |  |  | **$24.99** | Before tax and shipping; add the Xteink X4 display price |
+
+For the legacy Raspberry Pi display-node path, add:
+
+| Part | Qty | Unit price | Extended | Purpose |
+| --- | ---: | ---: | ---: | --- |
 | [Raspberry Pi Zero 2 W with pre-soldered header](https://www.pishop.us/product/raspberry-pi-zero-2w-with-headers/) | 1 | $20.75 | $20.75 | Compact Wi-Fi display node; no soldering required |
 | [5V 2.5A Micro-USB power supply](https://www.adafruit.com/product/1995) | 1 | $8.25 | $8.25 | Powers the display node with a standard straight cable |
 | [Official Raspberry Pi 64GB A2 microSD card](https://www.pishop.us/product/raspberry-pi-sd-card-64gb/) | 1 | $29.95 | $29.95 | Operating system and local image cache |
-| [Golden State Art 12 x 16 inch bronze frame](https://www.amazon.com/gp/aw/d/B0C1Q5MYG9) | 1 | $24.99 | $24.99 | Portrait frame; the included 8 x 10.5 inch mat must be enlarged or replaced |
-| **Framed display subtotal (excl. Xteink X4)** |  |  | **$83.94** | Before tax and shipping; add the Xteink X4 display price |
+| **Optional Pi display-node add-on** |  |  | **$58.95** | Required only for the Raspberry Pi display workflow |
 
 The display's active area is approximately 7.98 x 10.65 inches. The included
 8 x 10.5 inch mat masks part of that area and must not be used unchanged. Enlarge
@@ -157,35 +166,49 @@ controller is a Raspberry Pi 4 running 64-bit Ubuntu Server:
 | **Complete dedicated build** |  |  | **$532.58** | Framed display plus dedicated controller |
 
 Reference prices were checked on July 9, 2026. Retail prices and availability
-change; the totals exclude tax and shipping. A computer with a microSD reader
-is needed to flash the two cards. No HDMI cable, keyboard, mouse, right-angle
-cable, or display-node enclosure is required for normal operation.
+change; the totals exclude tax and shipping. The Raspberry Pi display-node path
+needs a computer with a microSD reader, while the direct firmware path needs a
+USB connection for flashing. No HDMI cable, keyboard, mouse, right-angle cable,
+or display-node enclosure is required for normal operation.
 
 The controller requires Python 3.11 or newer, Codex CLI authenticated with a
 ChatGPT subscription, and network access to Codex, iNaturalist, optional eBird,
-Zippopotam.us, and configured research sources. The display node requires
-Python 3.11 or newer with the Xteink X4 package and network access to the
-controller HTTP service.
+Zippopotam.us, and configured research sources. The firmware display-node path
+requires PlatformIO, the checked-out community SDK submodule, and network access
+to the controller HTTP service. The Raspberry Pi display-node path still
+requires Python 3.11 or newer with the Xteink X4 package.
 
 The panel reports a `1600x1200` landscape canvas. Plates are authored at
 `1200x1600` and rotated left for a portrait-mounted frame.
 
 ## Install
 
-The [complete installation guide](docs/installation.md) starts with blank
-macOS, Ubuntu, Raspberry Pi OS, and Raspberry Pi display-node systems. It covers
-the support matrix, Wi-Fi and SSH prerequisites, Codex authentication, hardware
-assembly, private TOML configuration, startup services, reboot recovery,
-updates, uninstall, and focused troubleshooting. Controller users can choose
-native macOS/Linux services or the production [Docker deployment](docs/docker.md).
+The [complete installation guide](docs/installation.md) starts with a blank
+controller plus either the Xteink firmware display-node path or the legacy
+Raspberry Pi display-node path. It covers the support matrix, Wi-Fi and SSH
+prerequisites, Codex authentication, hardware assembly, private TOML
+configuration, startup services, reboot recovery, updates, uninstall, and
+focused troubleshooting. Controller users can choose native macOS/Linux
+services or the production [Docker deployment](docs/docker.md).
 
 The commissioning flow is intentionally staged:
 
 1. prepare and diagnose the controller;
-2. flash the display Pi and attach the Xteink X4;
+2. flash the display node and attach the Xteink X4;
 3. show the included Eastern Bluebird without AI or a controller;
-4. prove the Pi can reach the controller; and
+4. prove the display node can reach the controller; and
 5. enable live rotation and automatic generation.
+
+For the direct-on-device firmware path, configure `firmware/include/config.h`
+from `firmware/include/config.h.example`, then build and flash with PlatformIO:
+
+```bash
+git submodule update --init --recursive
+cp firmware/include/config.h.example firmware/include/config.h
+cd firmware
+pio run
+pio run --target upload
+```
 
 Setup always previews first. Apply the same command with `--yes`, then require a
 clean doctor result:

@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
+          submodules: recursive
 
       - name: Install actionlint
         env:
@@ -55,11 +56,21 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3.2.4
 
+      - name: Install PlatformIO
+        run: python -m pip install "platformio>=6.1,<7"
+
       - name: Install dependencies
         run: uv sync --extra dev --locked
 
       - name: Validate public catalog
         run: uv run inky-bird-frame catalog validate --catalog catalog
+
+      - name: Compile firmware display node
+        run: |
+          set -euo pipefail
+          cp firmware/include/config.h.example firmware/include/config.h
+          cd firmware
+          pio run
 
       - name: Enforce add-only catalog contributions
         if: github.event_name == 'pull_request'
