@@ -13,6 +13,8 @@
 namespace inky_bird_frame {
 namespace {
 
+constexpr int UNKNOWN_CONTENT_LENGTH = -1;
+
 String percentEncodePath(const String& path) {
   String encoded;
   encoded.reserve(path.length() * 3);
@@ -134,7 +136,7 @@ bool fetchPngBytes(const String& displayPath, std::vector<uint8_t>& pngBytes, St
 
   uint8_t buffer[1024];
   int remaining = length;
-  while (http.connected() && (remaining > 0 || remaining == -1)) {
+  while (http.connected() && (remaining > 0 || remaining == UNKNOWN_CONTENT_LENGTH)) {
     const size_t available = stream->available();
     if (available == 0) {
       delay(1);

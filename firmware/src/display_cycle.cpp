@@ -4,6 +4,7 @@
 #include <esp_system.h>
 
 #include <algorithm>
+#include <cstdlib>
 #include <random>
 
 #include "config.h"
@@ -33,8 +34,15 @@ std::vector<uint32_t> parseTaxonIds(const String& raw) {
   while (start < raw.length()) {
     const int comma = raw.indexOf(',', start);
     const String piece = raw.substring(start, comma == -1 ? raw.length() : comma);
-    const uint32_t value = static_cast<uint32_t>(piece.toInt());
-    if (value > 0) {
+    bool digitsOnly = !piece.isEmpty();
+    for (size_t index = 0; index < piece.length(); ++index) {
+      if (!isDigit(piece[index])) {
+        digitsOnly = false;
+        break;
+      }
+    }
+    if (digitsOnly) {
+      const uint32_t value = static_cast<uint32_t>(strtoul(piece.c_str(), nullptr, 10));
       values.push_back(value);
     }
     if (comma == -1) {

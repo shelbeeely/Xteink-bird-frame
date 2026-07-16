@@ -78,7 +78,7 @@ To run the display node on the Xteink hardware itself, use the PlatformIO
 project in [`/firmware`](../firmware/README.md):
 
 ```bash
-cd /home/runner/work/Xteink-bird-frame/Xteink-bird-frame
+cd ~/inky-bird-frame
 git submodule update --init --recursive
 cp firmware/include/config.h.example firmware/include/config.h
 cd firmware

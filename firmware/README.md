@@ -22,8 +22,7 @@ The current firmware project targets the community SDK checked in at
 Copy the example config and edit the values for your installation:
 
 ```bash
-cp /home/runner/work/Xteink-bird-frame/Xteink-bird-frame/firmware/include/config.h.example \
-  /home/runner/work/Xteink-bird-frame/Xteink-bird-frame/firmware/include/config.h
+cp firmware/include/config.h.example firmware/include/config.h
 ```
 
 Set:
@@ -44,7 +43,7 @@ Initialize the SDK submodule and compile from the repository root:
 
 ```bash
 git submodule update --init --recursive
-cd /home/runner/work/Xteink-bird-frame/Xteink-bird-frame/firmware
+cd firmware
 pio run
 ```
 
@@ -53,7 +52,7 @@ pio run
 Connect the device over USB and upload with PlatformIO:
 
 ```bash
-cd /home/runner/work/Xteink-bird-frame/Xteink-bird-frame/firmware
+cd firmware
 pio run --target upload
 ```
 
