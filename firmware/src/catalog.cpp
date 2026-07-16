@@ -9,6 +9,8 @@
 namespace inky_bird_frame {
 namespace {
 
+constexpr size_t MAX_CATALOG_JSON_SIZE = 65536;
+
 bool isNonEmptyString(const JsonVariantConst& value) {
   const char* text = value.as<const char*>();
   return text != nullptr && text[0] != '\0';
@@ -54,7 +56,7 @@ bool CatalogClient::fetch(std::vector<CatalogEntry>& entries, String& errorMessa
   const String payload = http.getString();
   http.end();
 
-  DynamicJsonDocument document(65536);
+  DynamicJsonDocument document(MAX_CATALOG_JSON_SIZE);
   const DeserializationError jsonError = deserializeJson(document, payload);
   if (jsonError) {
     errorMessage = "Controller returned invalid catalog JSON";

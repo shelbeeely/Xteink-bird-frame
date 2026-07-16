@@ -14,6 +14,9 @@ namespace inky_bird_frame {
 namespace {
 
 constexpr int UNKNOWN_CONTENT_LENGTH = -1;
+constexpr uint8_t BASE_THRESHOLD = 96;
+constexpr uint8_t BAYER_SCALE_FACTOR = 8;
+constexpr size_t HTTP_BUFFER_SIZE = 1024;
 
 String percentEncodePath(const String& path) {
   String encoded;
@@ -90,7 +93,8 @@ void renderToFramebuffer(EInkDisplay& display, const std::vector<unsigned char>&
         const uint8_t blue = rgba[pixelIndex + 2];
         luminance = static_cast<uint8_t>((red * 30 + green * 59 + blue * 11) / 100);
       }
-      const uint8_t threshold = static_cast<uint8_t>(96 + bayerThreshold(x, y) * 8);
+      const uint8_t threshold = static_cast<uint8_t>(
+          BASE_THRESHOLD + bayerThreshold(x, y) * BAYER_SCALE_FACTOR);
       const bool white = luminance >= threshold;
       const size_t byteIndex = static_cast<size_t>(y) * targetWidthBytes + (x / 8);
       const uint8_t mask = static_cast<uint8_t>(0x80U >> (x % 8));
@@ -134,7 +138,7 @@ bool fetchPngBytes(const String& displayPath, std::vector<uint8_t>& pngBytes, St
   mbedtls_sha256_init(&shaContext);
   mbedtls_sha256_starts_ret(&shaContext, 0);
 
-  uint8_t buffer[1024];
+  uint8_t buffer[HTTP_BUFFER_SIZE];
   int remaining = length;
   while (http.connected() && (remaining > 0 || remaining == UNKNOWN_CONTENT_LENGTH)) {
     const size_t available = stream->available();

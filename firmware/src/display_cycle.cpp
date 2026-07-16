@@ -13,6 +13,12 @@
 namespace inky_bird_frame {
 namespace {
 
+std::mt19937 makeShuffleGenerator() {
+  const uint32_t hardwareSeed = static_cast<uint32_t>(esp_random());
+  const uint32_t fallbackSeed = static_cast<uint32_t>(millis());
+  return std::mt19937(hardwareSeed == 0 ? fallbackSeed : hardwareSeed ^ fallbackSeed);
+}
+
 String joinTaxonIds(const std::vector<uint32_t>& values) {
   String joined;
   for (size_t index = 0; index < values.size(); ++index) {
@@ -91,7 +97,7 @@ const CatalogEntry* entryByTaxonId(const std::vector<CatalogEntry>& entries, uin
 
 void shuffleWithoutImmediateRepeat(std::vector<uint32_t>& values,
                                    const std::optional<uint32_t>& lastTaxonId) {
-  std::mt19937 generator(static_cast<uint32_t>(esp_random()));
+  auto generator = makeShuffleGenerator();
   std::shuffle(values.begin(), values.end(), generator);
   if (values.size() > 1 && lastTaxonId.has_value() && values.front() == *lastTaxonId) {
     std::swap(values[0], values[1]);
